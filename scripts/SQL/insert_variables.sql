@@ -1,0 +1,3 @@
+use climate;
+INSERT INTO variables (variableid, variablecode, variablename, speciation, variableunitsid, samplemedium, valuetype, isregular, timesupport, timeunitsid, datatype, generalcategory, nodatavalue) VALUES (1, 'pr', 'Precipitation', 'Not Applicable', 54, 'Precipitation', 'Model Simulation Result', 1, 1, 104, 'Average', 'Climate', -9999);
+INSERT INTO variables (variableid, variablecode, variablename, speciation, variableunitsid, samplemedium, valuetype, isregular, timesupport, timeunitsid, datatype, generalcategory, nodatavalue) VALUES (2, 'tas', 'Temperature', 'Not Applicable', 96, 'Air', 'Model Simulation Result', 1, 1, 106, 'Average', 'Climate', -9999);
