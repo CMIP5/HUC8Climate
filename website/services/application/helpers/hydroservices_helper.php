@@ -998,40 +998,48 @@ if (!function_exists('db_GetSeriesCatalog')) {
 		$serviceCode = $ci->config->item('service_code');
 				
 		foreach($variablesResult->result_array() as $variableRow) {
+			$varCode = $variablesResult["VariableCode"];
+			
 			foreach ($methods as $methodRow) {
 				
 				//for the beginTime, endTime, beginTimeUTC, endTimeUTC we parse the methodDescription
 				$methodID = $methodRow['MethodID'];
 				$methodDescription = $methodRow['MethodDescription'];
-				$methodInfo = db_getMethodInfo($methodDescription);
-				$beginTime = $methodInfo["beginYear"]."-".$methodInfo["beginMonth"]."-14T00:00:00";
-				$endTime = $methodInfo["endYear"]."-".$methodInfo["endMonth"]."-14T00:00:00";
-				$valueCount = $methodInfo["valueCount"];
 				
-				$retVal .= "<series>";
-				$retVal .= variableFromDataRow($variableRow);
-				$retVal .= to_xml("valueCount", $valueCount);
-				$retVal .= "<variableTimeInterval xsi:type=\"TimeIntervalType\">";     
-				$retVal .= to_xml("beginDateTime", $beginTime);
-				$retVal .= to_xml("endDateTime", $endTime);
-				$retVal .= to_xml("beginDateTimeUTC", $beginTime);
-				$retVal .= to_xml("endDateTimeUTC", $endTime);
-				$retVal .= "</variableTimeInterval>";
-				$retVal .= "<method " . to_attribute('methodID', $methodID) . ">";
-				$retVal .= to_xml("methodCode", $methodID);
-				$retVal .= to_xml("methodDescription", $methodDescription);
-				$retVal .= to_xml("methodLink", "unknown");
-				$retVal .= '</method>';
-				$retVal .= '<source ' . to_attribute('sourceID', $sourceID) . '>';
-				$retVal .= to_xml("organization", $sourceOrganization);
-				$retVal .= to_xml("sourceDescription", $sourceDescription);
-				$retVal .= to_xml("citation", $sourceCitation);
-				$retVal .= "</source>";
-				$retVal .= "<qualityControlLevel " . to_attribute("qualityControlLevelID", $qcID) . ">";
-				$retVal .= to_xml("qualityControlLevelCode", $qcCode);
-				$retVal .= to_xml("definition", $qcDefinition);
-				$retVal .= "</qualityControlLevel>";
-				$retVal .= "</series>";
+				//check if the variable is _pr_ and only show methods associated with given variable
+				$has_pr = strpos($methodDescription, "_pr_");
+				if (($has_pr && $varCode == "pr") || (!$has_pr && $varCode == "tas")) {
+				
+					$methodInfo = db_getMethodInfo($methodDescription);
+					$beginTime = $methodInfo["beginYear"]."-".$methodInfo["beginMonth"]."-14T00:00:00";
+					$endTime = $methodInfo["endYear"]."-".$methodInfo["endMonth"]."-14T00:00:00";
+					$valueCount = $methodInfo["valueCount"];
+				
+					$retVal .= "<series>";
+					$retVal .= variableFromDataRow($variableRow);
+					$retVal .= to_xml("valueCount", $valueCount);
+					$retVal .= "<variableTimeInterval xsi:type=\"TimeIntervalType\">";     
+					$retVal .= to_xml("beginDateTime", $beginTime);
+					$retVal .= to_xml("endDateTime", $endTime);
+					$retVal .= to_xml("beginDateTimeUTC", $beginTime);
+					$retVal .= to_xml("endDateTimeUTC", $endTime);
+					$retVal .= "</variableTimeInterval>";
+					$retVal .= "<method " . to_attribute('methodID', $methodID) . ">";
+					$retVal .= to_xml("methodCode", $methodID);
+					$retVal .= to_xml("methodDescription", $methodDescription);
+					$retVal .= to_xml("methodLink", "unknown");
+					$retVal .= '</method>';
+					$retVal .= '<source ' . to_attribute('sourceID', $sourceID) . '>';
+					$retVal .= to_xml("organization", $sourceOrganization);
+					$retVal .= to_xml("sourceDescription", $sourceDescription);
+					$retVal .= to_xml("citation", $sourceCitation);
+					$retVal .= "</source>";
+					$retVal .= "<qualityControlLevel " . to_attribute("qualityControlLevelID", $qcID) . ">";
+					$retVal .= to_xml("qualityControlLevelCode", $qcCode);
+					$retVal .= to_xml("definition", $qcDefinition);
+					$retVal .= "</qualityControlLevel>";
+					$retVal .= "</series>";
+				}
 			}
 		}	    
 	    $retVal .= '</seriesCatalog>';
