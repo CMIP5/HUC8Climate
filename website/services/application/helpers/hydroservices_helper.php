@@ -596,6 +596,8 @@ if (!function_exists('wof_GetValues')) {
 
 	function wof_GetValues($location, $variable, $startDate, $endDate ) {
     	//get the short variable code and short site code
+		$hasMethodCode = false;
+		$methodCode = '';
     	$shortSiteCode = $location;
     	$shortVariableCode = $variable;
     	$pos1 = strpos($location, ":");
@@ -607,7 +609,17 @@ if (!function_exists('wof_GetValues')) {
 	    if ($pos2 >= 0) {
 	        $split2 = explode(":", $variable);
 	        $shortVariableCode = $split2[1];
+			
+			//now also check for methodCode
+			if (count($split2) > 2) {
+				$potentialMethodCode = $split2[2];
+				$pos3 = strpos($potentialMethodCode, "=");
+				$split3 = explode("=", $potentialMethodCode);
+				$methodCode = $split3[1];
+				$hasMethodCode = true;
+			}
 	    }
+		
  
 	    $retVal = '<timeSeriesResponse xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.cuahsi.org/waterML/1.1/">';
 	    $retVal .= wof_queryInfo_Values($location, $variable, $startDate, $endDate);
@@ -620,7 +632,12 @@ if (!function_exists('wof_GetValues')) {
 	    $retVal .= db_GetVariableByCode($shortVariableCode);
 
 	    //write list of data values
-	    $retVal .= db_GetValues($shortSiteCode, $shortVariableCode, $startDate, $endDate);
+		if ($hasMethodCode) {
+			$methods = db_GetMethodsByCode($methodCode);
+		} else {
+			$methods = db_GetMethodsByVariable($shortVariableCode);
+		}
+		$retVal .= db_GetValues($shortSiteCode, $shortVariableCode, $startDate, $endDate, $methods);
 
 	    $retVal .= "</timeSeries>";
 	    $retVal .= "</timeSeriesResponse>";
@@ -1651,45 +1668,6 @@ if (!function_exists('db_GetVariableByCodeWML2')) {
 	}
 }
 
-if (!function_exists('db_GetValues')) {
-
-	function db_GetValues($siteCode, $variableCode, $beginTime, $endTime) {
-	    $ci = &get_instance();
-
-	    //first get the metadata
-		// implement sql query (because of complex query date range that too difficult if still using active record) with escape string to avoid from SQL injection
-		$querymeta = "SELECT sc.SiteID, s.State, VariableID, MethodID, SourceID, QualityControlLevelID FROM " . get_table_name('SeriesCatalog') . " sc";
-		$querymeta .= " INNER JOIN " . get_table_name('Sites') . " s ON sc.SiteID = s.SiteID ";
-    	$querymeta .= " WHERE sc.SiteCode = ? AND VariableCode = ? ";
-
-		if ((isset($beginTime) && $beginTime != "") && (isset($endTime) && $endTime != "")) {
-			$querymeta .= " AND ( (BeginDateTime <= ? AND EndDateTime >= ? ) OR (BeginDateTime >= ? AND BeginDateTime <= ? ) OR (EndDateTime >= ? AND EndDateTime <= ?) )";
-  		}
-
-		if ((isset($beginTime) && $beginTime != "") && (isset($endTime) && $endTime != "")) {
-			$arr_param = array($siteCode,$variableCode,$beginTime,$endTime,$beginTime,$endTime,$beginTime,$endTime);
-		} else {
-			$arr_param = array($siteCode,$variableCode);
-		}
-
-		$result = $ci->db->query($querymeta,$arr_param);
-	
-	    if (!$result) {
-	        die("<p>Error in executing the SQL query " . $ci->db->last_query() . ": " .
-	            $ci->db->_error_message() . "</p>");
-	    }
-	
-	    $numSeries = $result->num_rows();
-	
-	    if ($numSeries == 0) {
-	        return "<values />";
-	    }
-	    else {	
-	        $row = $result->row("0","array");	
-	        return db_GetValues_OneSeries($siteCode, $row["State"], $variableCode, $beginTime, $endTime, $row["MethodID"], $row["SourceID"], $row["QualityControlLevelID"]);
-	    }
-	}
-}
 
 if (!function_exists('db_GetResultWML2')) {
 
@@ -1960,9 +1938,9 @@ if (!function_exists('to_metric')) {
 	}
 }
 
-if (!function_exists('db_GetValues_OneSeries')) {
+if (!function_exists('db_GetValues')) {
 
-	function db_GetValues_OneSeries($siteCode, $state, $variableCode, $beginTime, $endTime, $methodID, $sourceID, $qcID) {
+	function db_GetValues($siteCode, $variableCode, $beginTime, $endTime, $methods) {
 	    $ci = &get_instance();
 
 		//check for empty beginDT, endDT
@@ -1978,40 +1956,82 @@ if (!function_exists('db_GetValues_OneSeries')) {
 			$endDT = date("Y-m-d", strtotime('today'));
 		}
 		
-		//$beginDT = date("Y-m-d", strtotime($beginTime));
-		//$endDT = date("Y-m-d", strtotime($endTime));
+		$validMethods = array();
 
-		//generate the URL:
-		$base_url = "http://www.wcc.nrcs.usda.gov/reportGenerator/view_csv/customSingleStationReport/daily/";
-		$url = $base_url . $siteCode . ":". $state . ':SNTL%7Cid=%22%22%7Cname/' . $beginDT . ',' . $endDT . '/'. $variableCode . '::value';
+		//for every method, query the values
+		$retVal = "<values>";
 		
-		//get the values	
-		$txt_file = file_get_contents($url);
-
-        $rows = explode("\n", $txt_file);
-        array_shift($rows);
-        $nr = 0;
-
-        $retVal = "<values>";
-		$nr = 0;
-        foreach($rows as $row => $data) {
-		    $nr++;
-			if ($nr > 7) {
-		        $row_data = explode(',', $data);
-				if (count($row_data)>1) {
-			        $retVal .= '<value censorCode="nc" dateTime="' . $row_data[0] . 'T00:00:00"';
-					$retVal .= ' timeOffset="' . '-7' . '" dateTimeUTC="' . $row_data[0] . 'T07:00:00" '; 
-	                $retVal .= ' methodCode="' . $methodID . '" ';
-	                $retVal .= ' sourceCode="' . $sourceID . '" ';
-	                $retVal .= ' qualityControlLevelCode="' . $qcID . '" ';
-				$dv = $row_data[1];
-	            $retVal .= ">".to_metric($row_data[1], $variableCode)."</value>";
+		foreach($methods as $method) {
+			//values shown in output
+			$valuesShownForMethod = 0;
+			
+			//locate the file
+			$methodCode = $method["MethodID"];
+			$methodDescription = $method["MethodDescription"];
+			
+			//locate start row, end row
+			$methodInfo = db_getMethodInfo($methodDescription);
+			$beginRow = 0;
+			if (isset($beginTime) && $beginTime != "") {
+				$queryBeginYear = substr($beginTime, 0, 4);
+				$queryBeginMonth = substr($beginTime, 5, 2);
+				$beginRow = (($queryBeginYear - $methodInfo["beginYear"]) * 12) + ($queryBeginMonth - $methodInfo["beginMonth"]);
+				$queryBeginDay = substr($beginTime, 8, 2);
+				if ($queryBeginDay > 14) {
+					$beginRow = $beginRow + 1;
 				}
 			}
+			
+			$endRow = 12 * 300;
+			if (isset($endTime) && $endTime != "") {
+				$queryEndYear = substr($endTime, 0, 4);
+				$queryEndMonth = substr($endTime, 5, 2);
+				$endRow = (($queryEndYear - $methodInfo["beginYear"]) * 12) + ($queryEndMonth - $methodInfo["beginMonth"]);
+				//check for day (db times are for 14th of the month)
+				$queryEndDay = substr($endTime, 8, 2);
+				if ($queryEndDay < 14) {
+					$endRow = $endRow - 1;
+				}
+			}
+			
+			$filepath = 'C:/huc/' .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
+			
+			if (file_exists($filepath)) {
+				$txt_file = file_get_contents($filepath);
+				$rows = explode("\n", $txt_file);
+				
+				$rownum = 0;
+				foreach($rows as $row) {
+					if ($rownum >= $beginRow && $rownum <= $endRow) {
+						$row_data = explode(',', $row);
+						if (count($row_data) > 1) {
+							$datetime = substr($row_data[0], 0, -1);
+							$retVal .= '<value censorCode="nc" dateTime="' . $datetime . '"';
+							$retVal .= ' timeOffset="' . '-7' . '" dateTimeUTC="' . $datetime . '"'; 
+							$retVal .= ' methodCode="' . $methodCode . '" ';
+							$retVal .= ' sourceCode="1" qualityControlLevelCode="1" ';
+							$dv = $row_data[1];
+							$retVal .= ">".$dv."</value>";
+							$valuesShownForMethod++;
+						}
+					}
+					$rownum++;
+				}
+			}
+			if ($valuesShownForMethod > 0) {
+				array_push($validMethods, $method);
+			}
 		}
-	    $retVal .= db_GetQualityControlLevelByID($qcID);
-	    $retVal .= db_GetMethodByID($methodID);
-	    $retVal .= db_GetSourceByID($sourceID);	
+		
+	    $retVal .= db_GetQualityControlLevelByID(1);
+		foreach($validMethods as $method) {
+			$methodID = $method["MethodID"];
+			$retVal .= '<method methodID="' . $methodID . '"><methodCode>' . $methodID . "</methodCode>";
+			$retVal .= "<methodDescription>" . $method["MethodDescription"] . "</methodDescription>";
+			$retVal .= "<methodLink>Unknown</methodLink>";
+			$retVal .= "</method>";			
+		}
+	    $retVal .= db_GetSourceByID(1);	
 	    $retVal .= "<censorCode><censorCode>nc</censorCode><censorCodeDescription>not censored</censorCodeDescription></censorCode>";	
 	    $retVal .= "</values>";
 	
@@ -2214,6 +2234,42 @@ if (!function_exists('db_GetMethods')) {
 	    $ci = &get_instance();
 		
 		$query = $ci->db->query('SELECT MethodID, MethodDescription FROM methods');
+	    if (!$query) {
+	        die("<p>Error in executing the SQL query " . $ci->db->last_query() . ": " .
+	            $ci->db->_error_message() . "</p>");
+	    }
+		return $query->result_array();
+	}
+}
+
+if (!function_exists('db_GetMethodsByCode')) {
+
+	function db_GetMethodsByCode($methodCode) {
+	    $ci = &get_instance();
+		
+		$query = $ci->db->query('SELECT MethodID, MethodDescription FROM methods WHERE MethodID ='. $methodCode);
+	    if (!$query) {
+	        die("<p>Error in executing the SQL query " . $ci->db->last_query() . ": " .
+	            $ci->db->_error_message() . "</p>");
+	    }
+		return $query->result_array();
+	}
+}
+
+if (!function_exists('db_GetMethodsByVariable')) {
+
+	function db_GetMethodsByVariable($shortVariableCode) {
+		
+		$where = '';
+		if ($shortVariableCode == 'pr') {
+			$where = " WHERE MethodDescription LIKE '%_pr_%'";
+		} else {
+			$where = " WHERE MethodDescription NOT LIKE '%_pr_%'";
+		}
+		
+	    $ci = &get_instance();
+		
+		$query = $ci->db->query('SELECT MethodID, MethodDescription FROM methods'.$where);
 	    if (!$query) {
 	        die("<p>Error in executing the SQL query " . $ci->db->last_query() . ": " .
 	            $ci->db->_error_message() . "</p>");
