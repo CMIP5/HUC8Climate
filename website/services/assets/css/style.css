@@ -65,7 +65,7 @@ p.footer{
 }
 .info_label {
 	border-right: 1px solid #D0D0D0;
-    width:170px;
+    width:270px;
 	padding: 10px;
     text-align:left;
     float:left;
@@ -78,7 +78,7 @@ p.footer{
     height:auto;
 }
 label {
-    width:150px;
+    width:250px;
     height:30px;
     text-align:left;
     float:left;

@@ -45,15 +45,15 @@ header ("Location: ../".$MainDir."/");
 	
 	<meta name="viewport" content="width=device-width" />
 	
-	<link rel="shortcut icon" href="../../template/img/favicon.ico" />
-	<link rel="stylesheet" href="../../template/css/style.css" />
+	<link rel="shortcut icon" href="../template/img/favicon.ico" />
+	<link rel="stylesheet" href="../template/css/style.css" />
 
-	<script src="../../template/js/libs/modernizr-2.0-basic.min.js"></script>
+	<script src="../template/js/libs/modernizr-2.0-basic.min.js"></script>
 	
 </head>
 
 <body>
-	<?php include '../../header.php'; ?>
+	<?php include '../header.php'; ?>
 	<div id="content" class="wrapper clearfix">
 		<div id="breadcrumb">
 				<a href="../../index.php">Home</a> › <?php 
@@ -66,15 +66,18 @@ header ("Location: ../".$MainDir."/");
         <p>&nbsp;</p>
 	  	<p><?php echo stripslashes($description) ?></p>
 	  	<p>&nbsp;</p>
-		<p>If you use data from this database in a scientific or technical publication, please reference the database using the following citation:</p>
+		<p>The climate forecast models for USGS HUC8 Watersheds provide monthly temperature and precipitation data scaled to the spatial resolution of each USGS Hydrologic Unit Code (HUC8) watershed in the contiguous U.S. 
+		The historical data ranges from 1950 to 2006. The future predictions cover the time period 2006 - 2100 according to different global climate models and future climate scenarios. 
+		This data is based off the larger CMIP5 data collection. The time series data is provided in the WaterML format.</p>
+		
+		<p>If you use data from this database in a scientific or technical publication, please reference the data using the following citation:</p>
 <FONT FACE="'Courier New', Courier, monospace"><p> 
-	National Resources Conservation Service, 2014, Snow Telemetry (SNOTEL) Data & Products, accessed <?php echo date('M Y'); ?> using a Brigham Young University World Water Project Web Service
-	at URL <a href="http://worldwater.byu.edu/interactive/snotel/services/">http://worldwater.byu.edu/interactive/snotel/services/</a>.
+	Woodbury, D. et.al., 2014, HUC8 CMIP5 Climate Data, accessed <?php echo date('M Y'); ?> using a Brigham Young University World Water Project Web Service
+	at URL <a href="http://worldwater.byu.edu/climate/services/">http://worldwater.byu.edu/climate/services/</a>.
 	</p></FONT>
         <p>&nbsp;</p>
-        <a class="button2" href="<?php echo $link; ?>">Enter Database</a>
+        <a class="button2" href="http://worldwater.byu.edu/climate/services/">Enter Database</a>
            <p>&nbsp;</p>
-        <a class="button2" href="manageLP/index.php">Edit this page</a>
 
 </div>
     </div>

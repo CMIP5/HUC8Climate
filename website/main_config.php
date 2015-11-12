@@ -14,9 +14,9 @@ This file will be populated while deployment
 //MySql Database Configuration Settings
 
 define("DATABASE_HOST", "worldwater.byu.edu"); //for example define("DATABASE_HOST", "your_database_host");
-define("DATABASE_USERNAME", "WWO_Admin"); //for example define("DATABASE_USERNAME", "your_database_username");
+define("DATABASE_USERNAME", "YOUR_DB_USERNAME"); //for example define("DATABASE_USERNAME", "your_database_username");
 define("DATABASE_NAME", "climate");  //for example define("DATABASE_NAME", "your_database_name");
-define("DATABASE_PASSWORD", "isaiah4118"); //for example define("DATABASE_PASSWORD", "your_database_password");
+define("DATABASE_PASSWORD", "YOUR_DB_PASSWORD"); //for example define("DATABASE_PASSWORD", "your_database_password");
 
 
 //Cookie Settings - This is for Security!

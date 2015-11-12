@@ -1,11 +1,57 @@
 <?php $this->load->view('header'); ?>
 
 		<p>
-		The SNOTEL hydrologic data web services provide access to snow water equivalent, precipitation and air temperature data from the National Resources Conservation Service (NRCS)
-		Snow Telemetry (SNOTEL) observation network. The web service retrieves data from the NRCS SNOTEL website, formats it as WaterML, and returns it to the user.
+		The climate forecast models for USGS HUC8 Watersheds provide monthly temperature and precipitation data scaled to the spatial resolution 
+		of each USGS Hydrologic Unit Code (HUC8) watershed in the contiguous U.S. The historical data ranges from 1950 to 2006. 
+		The future predictions cover the time period 2006 - 2100 according to different global climate models and future climate scenarios. 
+		This data is based off the larger CMIP5 data collection. The time series data is provided in the WaterML format.
 		</p>
 		<br />
+		<h2>Example Queries</h2>
 		<div id="base_info">
+			<div class="info_container">
+			    <label class="info_label">
+						Get all HUC8 Watersheds in WaterML format
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetSitesObject" class="info_link">index.php/cuahsi_1_1.asmx/GetSitesObject</a>
+				</div> 
+			</div>
+			<div class="info_container">
+			    <label class="info_label">
+						Get all Variables in WaterML format
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetVariablesObject" class="info_link">index.php/cuahsi_1_1.asmx/GetVariablesObject</a>
+				</div> 
+			</div>
+			<div class="info_container">
+			    <label class="info_label">
+						List all available climate models for a HUC8 watershed in WaterML
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetSiteInfoObject?site=CMIP5:02080203" class="info_link">
+					index.php/cuahsi_1_1.asmx/GetSiteInfoObject?site=CMIP5:02080203</a>
+				</div> 
+			</div>
+			<div class="info_container">
+			    <label class="info_label">
+						Precipitation for a HUC8 watershed and time range (data from all models) in WaterML
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetValuesObject?location=CMIP5:02080203&variable=CMIP5:pr&startDate=2080-01-01&endDate=2080-01-31" class="info_link">
+					index.php/cuahsi_1_1.asmx/GetValuesObject?location=CMIP5:02080203&variable=CMIP5:pr&startDate=2080-01-01&endDate=2080-01-31</a>
+				</div> 
+			</div>
+			<div class="info_container">
+			    <label class="info_label">
+						Precipitation for a HUC8 watershed, selected model, and time range in WaterML
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetValuesObject?location=CMIP5:02080203&variable=CMIP5:pr:methodCode=1&startDate=2016-01-01&endDate=2100-01-31" class="info_link">
+					index.php/cuahsi_1_1.asmx/GetValuesObject?location=CMIP5:02080203&variable=CMIP5:pr:methodCode=1&startDate=2016-01-01&endDate=2100-01-31</a>
+				</div> 
+			</div>
 			<div class="info_container">
 			    <label class="info_label"><a href="<?php echo 'index.php/test';?>" class="info_link">REST Service Test</a></label>
 				<div class="info_content">
@@ -19,22 +65,6 @@
 				<div class="info_content">
 					<div class="link_desc">
 						&nbsp;Hydroserver soap service page.
-					</div>
-				</div> 
-			</div>
-			<div class="info_container">
-			    <label class="info_label"><a href="<?php echo 'index.php/wfs/write_xml?service=WFS&request=GetCapabilities&version=1.0.0';?>" class="info_link">WFS Services</a></label>
-				<div class="info_content">
-					<div class="link_desc">
-						&nbsp;WFS 1.0.0.
-					</div>
-				</div> 
-			</div>
-			<div class="info_container">
-			    <label class="info_label"><a href="<?php echo 'index.php/wfs/write_xml?service=WFS&request=GetCapabilities&version=2.0.0';?>" class="info_link">WFS Services</a></label>
-				<div class="info_content">
-					<div class="link_desc">
-						&nbsp;WFS 2.0.0.
 					</div>
 				</div> 
 			</div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8"/>
-	<title>SNOTEL Web Services</title>
+	<title>Climate Forecast Models for USGS HUC8 Watersheds Web Service</title>
 	<link rel="shortcut icon" href="<?=base_url()?>assets/images/favicon.ico" type="image/x-icon" />
 	<link rel="bookmark" href="<?=base_url()?>assets/images/favicon.ico" />
 
@@ -17,6 +17,6 @@
 <body>
 </script>
 <div id="container">
-	<h1>Welcome to SNOTEL Hydroserver</h1>
+	<h1>Welcome to Climate Forecast Models for USGS HUC8 Watersheds Web Service</h1>
 
 	<div id="body">

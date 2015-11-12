@@ -645,6 +645,48 @@ if (!function_exists('wof_GetValues')) {
 	}
 }
 
+if (!function_exists('csv_GetValues')) {
+
+	function csv_GetValues($location, $variable, $startDate, $endDate, $methodCode) {
+    	//get the short variable code and short site code
+		$hasMethodCode = ($methodCode != '');
+		
+    	$shortSiteCode = $location;
+    	$shortVariableCode = $variable;
+    	$pos1 = strpos($location, ":");
+    	if ($pos1 >= 0) {
+        	$split1 = explode(":", $location);
+        	$shortSiteCode = $split1[1];
+    	}
+    	$pos2 = strpos($variable, ":");
+	    if ($pos2 >= 0) {
+	        $split2 = explode(":", $variable);
+	        $shortVariableCode = $split2[1];
+			
+			//now also check for methodCode
+			if (count($split2) > 2) {
+				if (!hasMethodCode) {
+					$potentialMethodCode = $split2[2];
+					$pos3 = strpos($potentialMethodCode, "=");
+					$split3 = explode("=", $potentialMethodCode);
+					$methodCode = $split3[1];
+					$hasMethodCode = true;
+				}
+			}
+	    }
+
+	    //write list of data values
+		if ($hasMethodCode) {
+			$methods = db_GetMethodsByCode($methodCode);
+		} else {
+			$methods = db_GetMethodsByVariable($shortVariableCode);
+		}
+		$retVal = db_GetValuesCSV($shortSiteCode, $shortVariableCode, $startDate, $endDate, $methods);
+
+	    return $retVal;
+	}
+}
+
 if (!function_exists('wof_GetValues_2')) {
 
 	function wof_GetValues_2($location, $variable, $startDate, $endDate ) {
@@ -1015,7 +1057,7 @@ if (!function_exists('db_GetSeriesCatalog')) {
 		$serviceCode = $ci->config->item('service_code');
 				
 		foreach($variablesResult->result_array() as $variableRow) {
-			$varCode = $variablesResult["VariableCode"];
+			$varCode = $variableRow["VariableCode"];
 			
 			foreach ($methods as $methodRow) {
 				
@@ -1942,19 +1984,6 @@ if (!function_exists('db_GetValues')) {
 
 	function db_GetValues($siteCode, $variableCode, $beginTime, $endTime, $methods) {
 	    $ci = &get_instance();
-
-		//check for empty beginDT, endDT
-		if (isset($beginTime) && $beginTime != "") {
-			$beginDT = date("Y-m-d", strtotime($beginTime));
-  		} else {
-			$beginDT = date("Y-m-d", strtotime('1960-01-01'));
-		}
-		
-		if (isset($endTime) && $endTime != "") {
-			$endDT = date("Y-m-d", strtotime($endTime));
-  		} else {
-			$endDT = date("Y-m-d", strtotime('today'));
-		}
 		
 		$validMethods = array();
 
@@ -1994,7 +2023,8 @@ if (!function_exists('db_GetValues')) {
 				}
 			}
 			
-			$filepath = 'C:/huc/' .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
+			//this needs to be changed on the server!
+			$filepath = 'C:/huc8/' .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
 			
 			if (file_exists($filepath)) {
 				$txt_file = file_get_contents($filepath);
@@ -2007,7 +2037,7 @@ if (!function_exists('db_GetValues')) {
 						if (count($row_data) > 1) {
 							$datetime = substr($row_data[0], 0, -1);
 							$retVal .= '<value censorCode="nc" dateTime="' . $datetime . '"';
-							$retVal .= ' timeOffset="' . '-7' . '" dateTimeUTC="' . $datetime . '"'; 
+							$retVal .= ' timeOffset="' . '0' . '" dateTimeUTC="' . $datetime . '"'; 
 							$retVal .= ' methodCode="' . $methodCode . '" ';
 							$retVal .= ' sourceCode="1" qualityControlLevelCode="1" ';
 							$dv = $row_data[1];
@@ -2017,7 +2047,7 @@ if (!function_exists('db_GetValues')) {
 					}
 					$rownum++;
 				}
-			}
+			} 
 			if ($valuesShownForMethod > 0) {
 				array_push($validMethods, $method);
 			}
@@ -2038,6 +2068,78 @@ if (!function_exists('db_GetValues')) {
 	    return $retVal;
 	}
 }
+
+
+if (!function_exists('db_GetValuesCSV')) {
+
+	function db_GetValuesCSV($siteCode, $variableCode, $beginTime, $endTime, $methods) {
+		
+		$validMethods = array();
+
+		//for every method, query the values
+		$retVal = "\"time\",\"value\",\"method\"\n";
+		
+		foreach($methods as $method) {
+			//values shown in output
+			$valuesShownForMethod = 0;
+			
+			//locate the file
+			$methodCode = $method["MethodID"];
+			$methodDescription = $method["MethodDescription"];
+			
+			//locate start row
+			$methodInfo = db_getMethodInfo($methodDescription);
+			$beginRow = 0;
+			if (isset($beginTime) && $beginTime != "") {
+				$queryBeginYear = substr($beginTime, 0, 4);
+				$queryBeginMonth = substr($beginTime, 5, 2);
+				$beginRow = (($queryBeginYear - $methodInfo["beginYear"]) * 12) + ($queryBeginMonth - $methodInfo["beginMonth"]);
+				$queryBeginDay = substr($beginTime, 8, 2);
+				if ($queryBeginDay > 14) {
+					$beginRow = $beginRow + 1;
+				}
+			}
+			
+			//locate end row
+			$endRow = 12 * 300;
+			if (isset($endTime) && $endTime != "") {
+				$queryEndYear = substr($endTime, 0, 4);
+				$queryEndMonth = substr($endTime, 5, 2);
+				$endRow = (($queryEndYear - $methodInfo["beginYear"]) * 12) + ($queryEndMonth - $methodInfo["beginMonth"]);
+				//check for day (db times are for 14th of the month)
+				$queryEndDay = substr($endTime, 8, 2);
+				if ($queryEndDay < 14) {
+					$endRow = $endRow - 1;
+				}
+			}
+			
+			//this needs to be changed on the server!
+			$filepath = 'C:/huc8/' .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
+			
+			if (file_exists($filepath)) {
+				$txt_file = file_get_contents($filepath);
+				$rows = explode("\n", $txt_file);
+				
+				$rownum = 0;
+				foreach($rows as $row) {
+					if ($rownum >= $beginRow && $rownum <= $endRow) {
+						$row_data = explode(',', $row);
+						if (count($row_data) > 1) {
+							$datetime = substr($row_data[0], 0, -1);
+							$dv = substr($row_data[1], 0, -1);
+							$retVal .= "\"".$datetime ."\",";
+							$retVal .= $dv.",";
+							$retVal .= "\"".$methodDescription."\"\n";
+						}
+					}
+					$rownum++;
+				}
+			} 
+		}
+	    return $retVal;
+	}
+}
+
 
 if (!function_exists('db_GetValues_OneSeriesWML2')) {
 

@@ -11,6 +11,10 @@ class Cuahsi extends CI_Controller {
 		RunService();
 		exit;
 	}
+	
+	public function GetValuesCSV() {
+		echo "get values CSV!!!";
+	}
 
 	/**
 	 * Implement GetSiteInfo
@@ -220,6 +224,8 @@ class Cuahsi extends CI_Controller {
 	 */
 	public function GetValuesObject()
 	{
+		
+		
 		if ($this->validate_token()) {
 			if (!isset($_REQUEST['location'])) {
 	            echo "Missing parameter: location";
@@ -233,9 +239,40 @@ class Cuahsi extends CI_Controller {
 	        $variable = $_REQUEST["variable"];
 	        $startDate = isset($_REQUEST["startDate"])? $_REQUEST["startDate"]:"";
 	        $endDate = isset($_REQUEST["endDate"])? $_REQUEST["endDate"]:"";
-	        write_XML_header();
-	        echo wof_GetValues($location, $variable, $startDate, $endDate);
-	        exit;
+			
+			$csv_output = 0;
+			if (isset($_REQUEST['format'])) {
+				if ($_REQUEST['format'] == 'csv') {
+					$csv_output = 1;
+				}
+			}
+			if ($csv_output) {
+				$method = isset($_REQUEST["method"])? $_REQUEST["method"]:"";
+				$now = gmdate("D, d M Y H:i:s");
+				if ($method == "") {
+					$filename = $location . '-' . $variable . '.csv';
+				} else {
+					$filename = $location . '-' . $variable . '-' . $method . '.csv';
+				}
+
+				header("Last-Modified: {$now} GMT");
+
+				// force download  
+				header("Content-Type: application/force-download");
+				header("Content-Type: application/octet-stream");
+				header("Content-Type: application/download");
+
+				// disposition / encoding on response body
+				
+				header("Content-Disposition: attachment;filename={$filename}");
+				header("Content-Transfer-Encoding: binary");
+				echo csv_GetValues($location, $variable, $startDate, $endDate, $method);
+				exit;
+			} else {
+				write_XML_header();
+				echo wof_GetValues($location, $variable, $startDate, $endDate);
+				exit;
+			}
    		}
 	}
 

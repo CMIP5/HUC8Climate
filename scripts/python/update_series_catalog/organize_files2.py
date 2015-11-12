@@ -7,14 +7,22 @@ from findtools.find_files import (find_files, Match)
 
 
 def move_files(base_dir):
+    print base_dir
+    i = 0
     files = os.listdir(base_dir)
     for f in files:
+        i += 1
+        rem = i % 100
+        if rem == 0:
+            print i
+
         oldname = base_dir + '\\' + f
         huc = f[:8]
         hucdir = "C:\huc8" + '\\' + huc
         newname = hucdir + '\\' + f
-        shutil.copy(oldname, newname)
-        print newname
+        if not os.path.exists(newname):
+            shutil.copy(oldname, newname)
+            #print oldname
 
 
 #make the HUC directories

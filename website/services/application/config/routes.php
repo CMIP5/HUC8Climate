@@ -55,6 +55,7 @@ $route["cuahsi_1_1.asmx/GetVariables"] 				= "cuahsi/GetVariables";
 $route["cuahsi_1_1.asmx/GetVariablesObject"] 		= "cuahsi/GetVariablesObject";
 $route["cuahsi_1_1.asmx/GetVariableInfo"] 			= "cuahsi/GetVariableInfo";
 $route["cuahsi_1_1.asmx/GetVariableInfoObject"] 	= "cuahsi/GetVariableInfoObject";
+$route["cuahsi_1_1.asmx/GetValuesCSV"]              = "cuahsi/GetValuesCSV";
 // end of REST routing
 
 // Test Page routing
