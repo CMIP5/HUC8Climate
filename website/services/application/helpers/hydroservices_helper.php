@@ -678,12 +678,24 @@ if (!function_exists('csv_GetValues')) {
 	    //write list of data values
 		if ($hasMethodCode) {
 			$methods = db_GetMethodsByCode($methodCode);
+			$filename = $shortSiteCode .'-'.$shortVariableCode.'-'.$methodCode.'.csv';
 		} else {
 			$methods = db_GetMethodsByVariable($shortVariableCode);
+			$filename = $shortSiteCode .'-'.$shortVariableCode.'.csv';
 		}
 		$retVal = db_GetValuesCSV($shortSiteCode, $shortVariableCode, $startDate, $endDate, $methods);
 
-	    return $retVal;
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
+
+		// disposition / encoding on response body	
+		header("Content-Disposition: attachment;filename={$filename}");
+		header("Content-Transfer-Encoding: binary");
+		
+		//header("Content-Type: text/csv");
+	    echo $retVal;
+		exit;
 	}
 }
 

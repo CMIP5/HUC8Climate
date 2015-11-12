@@ -53,10 +53,28 @@
 				</div> 
 			</div>
 			<div class="info_container">
+			    <label class="info_label">
+						Precipitation for a HUC8 watershed and time range (data from all models) in CSV
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetValuesCSV?location=CMIP5:02080203&variable=CMIP5:pr&startDate=2080-01-01&endDate=2080-01-31" class="info_link">
+					index.php/cuahsi_1_1.asmx/GetValuesCSV?location=CMIP5:02080203&variable=CMIP5:pr&startDate=2080-01-01&endDate=2080-01-31</a>
+				</div> 
+			</div>
+			<div class="info_container">
+			    <label class="info_label">
+						Precipitation for a HUC8 watershed, selected model, and time range in CSV
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetValuesCSV?location=CMIP5:02080203&variable=CMIP5:pr&method=1&startDate=2016-01-01&endDate=2100-01-31" class="info_link">
+					index.php/cuahsi_1_1.asmx/GetValuesCSV?location=CMIP5:02080203&variable=CMIP5:pr:methodCode=1&startDate=2016-01-01&endDate=2100-01-31</a>
+				</div> 
+			</div>
+			<div class="info_container">
 			    <label class="info_label"><a href="<?php echo 'index.php/test';?>" class="info_link">REST Service Test</a></label>
 				<div class="info_content">
 					<div class="link_desc">
-						&nbsp;You can perform tests on all of the methods in Hydrodata Server on this page. In this case the test for REST Service.
+						&nbsp;You can perform tests on all of the WaterOneFlow web methods on this page. In this case the test for REST Service.
 					</div>
 				</div> 
 			</div>

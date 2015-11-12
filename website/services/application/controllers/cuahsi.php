@@ -11,10 +11,6 @@ class Cuahsi extends CI_Controller {
 		RunService();
 		exit;
 	}
-	
-	public function GetValuesCSV() {
-		echo "get values CSV!!!";
-	}
 
 	/**
 	 * Implement GetSiteInfo
@@ -274,6 +270,31 @@ class Cuahsi extends CI_Controller {
 				exit;
 			}
    		}
+	}
+	
+	public function GetValuesCSV() {
+		if (!isset($_REQUEST['location'])) {
+	            echo "Missing parameter: location";
+	            exit;
+	    }
+	    if (!isset($_REQUEST['variable'])) {
+	            echo "Missing parameter: variable";
+	            exit;
+	        }
+	    $location = $_REQUEST["location"];
+		$variable = $_REQUEST["variable"];
+		$startDate = isset($_REQUEST["startDate"])? $_REQUEST["startDate"]:"";
+		$endDate = isset($_REQUEST["endDate"])? $_REQUEST["endDate"]:"";
+		$method = isset($_REQUEST["method"])? $_REQUEST["method"]:"";
+		$now = gmdate("D, d M Y H:i:s");
+		if ($method == "") {
+			$filename = $location . '-' . $variable . '.csv';
+		} else {
+			$filename = $location . '-' . $variable . '-' . $method . '.csv';
+		}
+
+		csv_GetValues($location, $variable, $startDate, $endDate, $method);
+		exit;
 	}
 
 	/**
