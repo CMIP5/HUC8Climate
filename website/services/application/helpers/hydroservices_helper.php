@@ -4,6 +4,16 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
+
+if (!function_exists('GetFilePath')) {
+	
+	function GetFilePath() {
+		#change basepath to /var/www/climate/files/huc8/ on remote server
+		$basepath = 'C:/huc8/';
+		return($basepath);
+	}
+}
+
 //run the service
 if (!function_exists('RunService')) {
 
@@ -698,6 +708,89 @@ if (!function_exists('csv_GetValues')) {
 		exit;
 	}
 }
+
+
+if (!function_exists('csv_GetMethods')) {
+
+	function csv_GetMethods() {
+    	
+		$ci = &get_instance();
+
+		$methods_table = get_table_name('Methods');
+
+		$ci->db->select("m.MethodID, m.MethodDescription");
+
+		$result = $ci->db->get($methods_table." m");
+
+	    if (!$result) {
+	        die("<p>Error in executing the SQL query " . $ci->db->last_query() . ": " .
+	            $ci->db->_error_message() . "</p>");
+	    }
+		
+		//for every method, query the values
+		$retVal = "\"MethodCode\",\"MethodDescription\"\n";
+		
+		foreach ($result->result_array() as $row) {
+		    $retVal .= $row["MethodID"].",";
+			$retVal .= "\"".$row["MethodDescription"]."\"\n";
+		}
+		
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
+
+		// disposition / encoding on response body	
+		header("Content-Disposition: attachment;filename=methods.csv");
+		header("Content-Transfer-Encoding: binary");
+		
+		//header("Content-Type: text/csv");
+	    echo $retVal;
+		exit;
+	}
+}
+
+
+if (!function_exists('csv_GetSites')) {
+
+	function csv_GetSites() {
+    	
+		$ci = &get_instance();
+
+		$sites_table = get_table_name('Sites');
+
+		$ci->db->select("s.SiteName, s.SiteCode, s.Latitude, s.Longitude");
+
+		$result = $ci->db->get($sites_table." s");
+
+	    if (!$result) {
+	        die("<p>Error in executing the SQL query " . $ci->db->last_query() . ": " .
+	            $ci->db->_error_message() . "</p>");
+	    }
+		
+		//for every method, query the values
+		$retVal = "\"SiteName\",\"SiteCode\",\"Latitude\",\"Longitude\"\n";
+		
+		foreach ($result->result_array() as $row) {
+		    $retVal .= "\"".$row["SiteName"] ."\",";
+			$retVal .= "\"".$row["SiteCode"]."\",";
+			$retVal .= $row["Latitude"].",";
+			$retVal .= $row["Longitude"]."\n";
+		}
+		
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
+
+		// disposition / encoding on response body	
+		header("Content-Disposition: attachment;filename=sites.csv");
+		header("Content-Transfer-Encoding: binary");
+		
+		//header("Content-Type: text/csv");
+	    echo $retVal;
+		exit;
+	}
+}
+
 
 if (!function_exists('wof_GetValues_2')) {
 
@@ -2036,7 +2129,7 @@ if (!function_exists('db_GetValues')) {
 			}
 			
 			//this needs to be changed on the server!
-			$filepath = 'C:/huc8/' .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
+			$filepath = GetFilePath() .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
 			
 			if (file_exists($filepath)) {
 				$txt_file = file_get_contents($filepath);
@@ -2126,7 +2219,7 @@ if (!function_exists('db_GetValuesCSV')) {
 			}
 			
 			//this needs to be changed on the server!
-			$filepath = 'C:/huc8/' .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
+			$filepath = GetFilePath() .$siteCode . '/'.$siteCode.'-'.$methodDescription.'.csv';
 			
 			if (file_exists($filepath)) {
 				$txt_file = file_get_contents($filepath);

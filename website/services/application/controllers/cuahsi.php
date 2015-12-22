@@ -107,6 +107,26 @@ class Cuahsi extends CI_Controller {
 	        exit;
    		}
 	}
+	
+	/**
+	 * Implement GetSitesCSV
+	 *
+	 */
+	public function GetSitesCSV() {
+
+		csv_GetSites();
+		exit;
+	}
+	
+	/**
+	 * Implement GetMethodsCSV
+	 *
+	 */
+	public function GetMethodsCSV() {
+
+		csv_GetMethods();
+		exit;
+	}
 
 	/**
 	 * Implement GetSitesByBoxObject

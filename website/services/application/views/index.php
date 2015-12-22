@@ -54,6 +54,24 @@
 			</div>
 			<div class="info_container">
 			    <label class="info_label">
+						All HUC8 watershed names, HUC8 codes and coordinates in CSV
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetSitesCSV" class="info_link">
+					index.php/cuahsi_1_1.asmx/GetSitesCSV</a>
+				</div> 
+			</div>
+			<div class="info_container">
+			    <label class="info_label">
+						All available CMIP5 climate model codes and names in CSV
+				</label>
+				<div class="link_desc">
+					&nbsp;&nbsp;<a href="index.php/cuahsi_1_1.asmx/GetMethodsCSV" class="info_link">
+					index.php/cuahsi_1_1.asmx/GetMethodsCSV</a>
+				</div> 
+			</div>
+			<div class="info_container">
+			    <label class="info_label">
 						Precipitation for a HUC8 watershed and time range (data from all models) in CSV
 				</label>
 				<div class="link_desc">
